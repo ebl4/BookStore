@@ -1,64 +1,51 @@
 ﻿using System.Threading.Tasks;
 using BookStore.Localization;
 using BookStore.MultiTenancy;
-using Volo.Abp.Identity.Web.Navigation;
-using Volo.Abp.SettingManagement.Web.Navigation;
+using BookStore.Permissions;
 using Volo.Abp.TenantManagement.Web.Navigation;
 using Volo.Abp.UI.Navigation;
 
-namespace BookStore.Web.Menus;
-
-public class BookStoreMenuContributor : IMenuContributor
+namespace BookStore.Web.Menus
 {
-    public async Task ConfigureMenuAsync(MenuConfigurationContext context)
+    public class BookStoreMenuContributor : IMenuContributor
     {
-        if (context.Menu.Name == StandardMenus.Main)
+        public async Task ConfigureMenuAsync(MenuConfigurationContext context)
         {
-            await ConfigureMainMenuAsync(context);
+            if (context.Menu.Name == StandardMenus.Main)
+            {
+                await ConfigureMainMenuAsync(context);
+            }
         }
-    }
 
-    private async Task ConfigureMainMenuAsync(MenuConfigurationContext context)
-    {
-        var administration = context.Menu.GetAdministration();
-        var l = context.GetLocalizer<BookStoreResource>();
+        private async Task ConfigureMainMenuAsync(MenuConfigurationContext context)
+        {
+            if (!MultiTenancyConsts.IsEnabled)
+            {
+                var administration = context.Menu.GetAdministration();
+                administration.TryRemoveMenuItem(TenantManagementMenuNames.GroupName);
+            }
 
-        context.Menu.Items.Insert(
-            0,
-            new ApplicationMenuItem(
-                BookStoreMenus.Home,
-                l["Menu:Home"],
-                "~/",
-                icon: "fas fa-home",
-                order: 0
-            )
-        );
+            var l = context.GetLocalizer<BookStoreResource>();
 
-        context.Menu.AddItem(
-            new ApplicationMenuItem(
+            context.Menu.Items.Insert(0, new ApplicationMenuItem("BookStore.Home", l["Menu:Home"], "~/"));
+
+            var bookStoreMenu = new ApplicationMenuItem(
                 "BooksStore",
                 l["Menu:BookStore"],
                 icon: "fa fa-book"
-            ).AddItem(
-                new ApplicationMenuItem(
+            );
+
+            context.Menu.AddItem(bookStoreMenu);
+
+            //CHECK the PERMISSION
+            if (await context.IsGrantedAsync(BookStorePermissions.Books.Default))
+            {
+                bookStoreMenu.AddItem(new ApplicationMenuItem(
                     "BooksStore.Books",
                     l["Menu:Books"],
                     url: "/Books"
-                )
-            )
-        );
-
-        if (MultiTenancyConsts.IsEnabled)
-        {
-            administration.SetSubItemOrder(TenantManagementMenuNames.GroupName, 1);
+                ));
+            }
         }
-        else
-        {
-            administration.TryRemoveMenuItem(TenantManagementMenuNames.GroupName);
-        }
-
-        administration.SetSubItemOrder(IdentityMenuNames.GroupName, 2);
-        administration.SetSubItemOrder(SettingManagementMenuNames.GroupName, 3);
-
     }
 }
