@@ -21,27 +21,19 @@ namespace BookStore
         {
             if (await _bookRepository.GetCountAsync() <= 0)
             {
-                await _bookRepository.InsertAsync(
-                    new Book
-                    {
-                        Name = "1984",
-                        Type = BookType.Dystopia,
-                        PublishDate = new DateTime(1949, 6, 8),
-                        Price = 19.84f
-                    },
-                    autoSave: true
-                );
-
-                await _bookRepository.InsertAsync(
-                    new Book
-                    {
-                        Name = "The Hitchhiker's Guide to the Galaxy",
-                        Type = BookType.ScienceFiction,
-                        PublishDate = new DateTime(1995, 9, 27),
-                        Price = 42.0f
-                    },
-                    autoSave: true
-                );
+                for (int i = 0; i < 1000; i++)
+                {
+                    await _bookRepository.InsertAsync(
+                        new Book
+                        {
+                            Name = $"Book {i}",
+                            Type = (BookType)new Random().Next(8),
+                            PublishDate = DateTime.Now,
+                            Price = (float)(new Random().NextDouble() * 100) + 10,
+                        },
+                        autoSave: true
+                    );
+                }
             }
         }
     }
