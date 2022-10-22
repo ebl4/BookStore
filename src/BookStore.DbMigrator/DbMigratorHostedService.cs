@@ -24,9 +24,10 @@ public class DbMigratorHostedService : IHostedService
     {
         using (var application = await AbpApplicationFactory.CreateAsync<BookStoreDbMigratorModule>(options =>
         {
-           options.Services.ReplaceConfiguration(_configuration);
-           options.UseAutofac();
-           options.Services.AddLogging(c => c.AddSerilog());
+            // Add this line of code to make it possible read from appsettings.Staging.json
+            options.Services.ReplaceConfiguration(BuildConfiguration());
+            options.UseAutofac();
+            options.Services.AddLogging(c => c.AddSerilog());
         }))
         {
             await application.InitializeAsync();
@@ -40,6 +41,15 @@ public class DbMigratorHostedService : IHostedService
 
             _hostApplicationLifetime.StopApplication();
         }
+    }
+
+    private static IConfiguration BuildConfiguration()
+    {
+        var configurationBuilder = new ConfigurationBuilder().AddJsonFile("appsettings.json");
+
+        return configurationBuilder
+            .AddEnvironmentVariables()
+            .Build();
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
