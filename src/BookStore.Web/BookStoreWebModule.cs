@@ -39,6 +39,8 @@ using Volo.Abp.UI.Navigation;
 using Volo.Abp.VirtualFileSystem;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using BookStore.Permissions;
+using System.Security.Cryptography.X509Certificates;
+using Volo.Abp.OpenIddict;
 
 namespace BookStore.Web;
 
@@ -59,6 +61,8 @@ public class BookStoreWebModule : AbpModule
 {
     public override void PreConfigureServices(ServiceConfigurationContext context)
     {
+        var hostingEnvironment = context.Services.GetHostingEnvironment();
+
         context.Services.PreConfigure<AbpMvcDataAnnotationsLocalizationOptions>(options =>
         {
             options.AddAssemblyResource(
@@ -80,6 +84,22 @@ public class BookStoreWebModule : AbpModule
                 options.UseAspNetCore();
             });
         });
+
+        if (!hostingEnvironment.IsDevelopment())
+        {
+
+            PreConfigure<AbpOpenIddictAspNetCoreOptions>(options =>
+            {
+                options.AddDevelopmentEncryptionAndSigningCertificate = false;
+            });
+
+            PreConfigure<OpenIddictServerBuilder>(builder =>
+            {
+                // In production, it is recommended to use two RSA certificates, one for encryption, one for signing.
+                builder.AddEncryptionCertificate("F3182AF8DEDFCF93117F4AE907C63B48B7E26004")
+                       .AddSigningCertificate("F3182AF8DEDFCF93117F4AE907C63B48B7E26004");
+            });
+        }
     }
 
     public override void ConfigureServices(ServiceConfigurationContext context)
