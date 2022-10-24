@@ -19,7 +19,7 @@ namespace BookStore.EntityFrameworkCore;
 
 [ReplaceDbContext(typeof(IIdentityDbContext))]
 [ReplaceDbContext(typeof(ITenantManagementDbContext))]
-[ConnectionStringName("Default")]
+[ConnectionStringName("AZURE_SQL_CONNECTIONSTRING")]
 public class BookStoreDbContext :
     AbpDbContext<BookStoreDbContext>,
     IIdentityDbContext,
