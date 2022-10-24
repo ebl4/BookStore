@@ -17,7 +17,7 @@ public class BookStoreDbContextFactory : IDesignTimeDbContextFactory<BookStoreDb
         var configuration = BuildConfiguration();
 
         var builder = new DbContextOptionsBuilder<BookStoreDbContext>()
-            .UseSqlServer(configuration.GetConnectionString("Default"));
+            .UseSqlServer(configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING"));
 
         return new BookStoreDbContext(builder.Options);
     }
