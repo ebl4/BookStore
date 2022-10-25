@@ -27,7 +27,7 @@ namespace BookStore.Books
 
             //Assert
             result.TotalCount.ShouldBeGreaterThan(0);
-            result.Items.ShouldContain(b => b.Name == "1984");
+            result.Items.ShouldContain(b => b.Name == "Book 990");
         }
 
         [Fact]
